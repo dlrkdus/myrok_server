@@ -37,3 +37,6 @@ out/
 .vscode/
 
 application-security.properties
+application.properties
+
+/test

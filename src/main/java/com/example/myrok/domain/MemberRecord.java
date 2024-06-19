@@ -2,6 +2,7 @@ package com.example.myrok.domain;
 
 import com.example.myrok.type.Role;
 import jakarta.persistence.*;
+import jdk.jfr.Description;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberRecord {
+public class MemberRecord extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mr_id")
@@ -27,6 +28,15 @@ public class MemberRecord {
     @JoinColumn(name = "r_id")
     private Record record;
 
+    @Description("MemberRecord 매핑 삭제")
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private Boolean deleted = false;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    public void delete(){
+        this.deleted=true;
+    }
 }
