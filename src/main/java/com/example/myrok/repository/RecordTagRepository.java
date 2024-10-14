@@ -1,6 +1,7 @@
 package com.example.myrok.repository;
 
 import com.example.myrok.domain.RecordTag;
+import com.example.myrok.dto.project.TagCountDTO;
 import com.example.myrok.dto.project.TagDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,11 @@ public interface RecordTagRepository extends JpaRepository<RecordTag,Long> {
             "GROUP BY rt.tagName " +
             "ORDER BY COUNT(rt) DESC")
     Optional<List<TagDTO>> findTagNameAndCountByProjectIdAndDeletedIsFalse(@Param("projectId") Long projectId);
+
+    @Query("SELECT new com.example.myrok.dto.project.TagCountDTO(rt.tagName, COUNT(rt)) " +
+            "FROM RecordTag rt " +
+            "WHERE rt.projectId = :projectId AND rt.deleted = false " +
+            "GROUP BY rt.tagName " +
+            "ORDER BY COUNT(rt) DESC")
+    Optional<List<TagCountDTO>> findTagNameAndCountByProjectIdAndDeletedIsFalseForRecord(@Param("projectId") Long projectId);
 }

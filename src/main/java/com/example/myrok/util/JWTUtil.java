@@ -1,9 +1,12 @@
 package com.example.myrok.util;
 
+import com.example.myrok.exception.CustomException;
 import com.example.myrok.exception.CustomJWTException;
+import com.example.myrok.type.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -48,15 +51,15 @@ public class JWTUtil {
                     .parseClaimsJws(token) // 파싱 및 검증, 실패 시 에러
                     .getBody();
         }catch(MalformedJwtException malformedJwtException){
-            throw new CustomJWTException("MalFormed");
+            throw new CustomJWTException(ErrorCode.MALFORMED, HttpStatus.BAD_REQUEST);
         }catch(ExpiredJwtException expiredJwtException){
-            throw new CustomJWTException("Expired");
+            throw new CustomJWTException(ErrorCode.EXPIRED, HttpStatus.BAD_GATEWAY);
         }catch(InvalidClaimException invalidClaimException){
-            throw new CustomJWTException("Invalid");
+            throw new CustomJWTException(ErrorCode.INVALID, HttpStatus.BAD_GATEWAY);
         }catch(JwtException jwtException){
-            throw new CustomJWTException("JWTError");
-        }catch(Exception e){
-            throw new CustomJWTException("Error");
+            throw new CustomJWTException(ErrorCode.JWTERROR, HttpStatus.BAD_GATEWAY);
+        }catch (Exception e){
+            throw new CustomException(ErrorCode.JWTERROR, HttpStatus.BAD_GATEWAY);
         }
         return claim;
     }

@@ -55,7 +55,6 @@ public class CustomSecurityConfig {
             //로그인 성공시 핸들러 사용 -> 성공시 핸들러 사용
             config.successHandler(new APILoginSuccessHandler());
         });
-
         http.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling(config ->{
@@ -77,7 +76,7 @@ public class CustomSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOriginPatterns(Arrays.asList("*"));
-        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"));
+        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         corsConfiguration.setAllowCredentials(true);
 

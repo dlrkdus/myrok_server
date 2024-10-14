@@ -22,6 +22,8 @@ public class ChatCompletionService {
 
     public String chatCompletions(String question) {
 
+        System.out.println(apiKey);
+
         Message message = Message.builder()
                 .role(ROLE_USER)
                 .content(question)

@@ -31,7 +31,14 @@ public enum ErrorCode implements EnumModel{
     // memberRecord
     DELETED_MR_CODE(40404,"MR001","이미 삭제된 MemberRecord 매핑입니다."),
     // recordTag
-    DELETED_RT_CODE(40405,"RT001","이미 삭제된 RecordTag 매핑입니다.");
+    DELETED_RT_CODE(40405,"RT001","이미 삭제된 RecordTag 매핑입니다."),
+
+    //JWT
+    MALFORMED(40001, "JWT001", "잘못된 형식입니다."),
+    EXPIRED(40002, "JWT002", "만료된 토큰입니다."),
+    INVALID(40003, "JWT003", "부적절한 토큰입니다."),
+    JWTERROR(40004, "JWT004", "올바르지 않은 토큰입니다"),
+    NULL_REFRESH(40006, "JWT006", "Refresh token값이 없습니다.");
 
 
 

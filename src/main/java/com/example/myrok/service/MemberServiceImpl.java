@@ -3,6 +3,8 @@ package com.example.myrok.service;
 import com.example.myrok.domain.Member;
 import com.example.myrok.domain.MemberProject;
 import com.example.myrok.domain.Project;
+import com.example.myrok.dto.member.MemberInfoResponse;
+import com.example.myrok.dto.member.MemberProjectResponse;
 import com.example.myrok.exception.CustomException;
 import com.example.myrok.repository.MemberProjectRepository;
 import com.example.myrok.repository.MemberRepository;
@@ -15,6 +17,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -57,20 +60,50 @@ public class MemberServiceImpl implements MemberService {
                 .memberProjectType(MemberProjectType.PROJECT_MEMBER)
                 .build();
 
-        return memberProjectRepository.save(memberProject).getId();
+        memberProjectRepository.save(memberProject);
+        return project.get().getId();
     }
 
     @Override
-    public Long getOutFromProject(Long memberId, Long projectId, String socialId) {
-        MemberProject memberProject = memberProjectRepository.findByMemberIdAndProjectIdAndMemberProjectType(memberId, projectId, MemberProjectType.PROJECT_MEMBER).orElseThrow(new CustomException(ErrorCode.MEMBER_NOT_ACCEPTABLE, HttpStatus.NOT_ACCEPTABLE));
-
+    public Long getOutFromProject(Long projectId, String socialId) {
         Member member = memberRepository.findBySocialId(socialId).orElseThrow(NoSuchElementException::new);
         member.deleteRole(MemberRole.TEAMMEMBER);
         if(member.getMemberRoleList().contains(MemberRole.CREATOR)){
             member.deleteRole(MemberRole.CREATOR);
         }
 
+        MemberProject memberProject = memberProjectRepository.findByMemberAndProjectIdAndMemberProjectType(member, projectId, MemberProjectType.PROJECT_MEMBER).orElseThrow(new CustomException(ErrorCode.MEMBER_NOT_ACCEPTABLE, HttpStatus.NOT_ACCEPTABLE));
         memberProject.changeMemberProjectType(MemberProjectType.NON_PROJECT_MEMBER);
         return memberProjectRepository.save(memberProject).getId();
+    }
+
+    public MemberInfoResponse getMemberInformation(String socialId) {
+        Member member = memberRepository.findBySocialId(socialId).orElseThrow(NoSuchFieldError::new);
+
+        return MemberInfoResponse.of(member);
+    }
+
+    public MemberProjectResponse getMyProject(String socialId) {
+        Member member = memberRepository.findBySocialId(socialId).orElse(null);
+
+        if (member == null) {
+            // Member가 없을 경우 빈 객체 반환
+            return MemberProjectResponse.builder().build();
+        }
+
+        MemberProject memberProject = memberProjectRepository.findByMemberAndMemberProjectType(member, MemberProjectType.PROJECT_MEMBER).orElse(null);
+
+        if (memberProject == null) {
+            // MemberProject가 없을 경우 빈 객체 반환
+            return MemberProjectResponse.builder().build();
+        }
+
+        // MemberProject가 있을 경우 해당 데이터로 응답 객체 생성
+        return MemberProjectResponse.builder()
+                .projectId(memberProject.getProject().getId())
+                .projectName(memberProject.getProjectName())
+                .startDate(String.valueOf(memberProject.getProject().getStartDate()))
+                .endDate(String.valueOf(memberProject.getProject().getEndDate()))
+                .build();
     }
 }

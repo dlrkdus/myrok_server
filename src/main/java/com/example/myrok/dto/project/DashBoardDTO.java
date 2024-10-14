@@ -23,4 +23,14 @@ public class DashBoardDTO {
         private List<TagDTO> tags;
         private Long totalCount;
     }
+
+    @Data
+    @NoArgsConstructor
+    @Builder
+    @AllArgsConstructor
+    @ToString
+    public static class TagCountListDTO{
+        private List<TagCountDTO> tagList;
+        private Long totalCount;
+    }
 }

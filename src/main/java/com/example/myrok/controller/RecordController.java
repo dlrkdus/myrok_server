@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,13 +44,14 @@ public class RecordController {
     )
     @PreAuthorize("hasAnyAuthority('ROLE_USER', 'TEAMMEMBER')")
     @PostMapping("/records")
-    public ResponseEntity<Long> save( @RequestBody @Valid RecordDTO recordDTO){
+    public ResponseEntity<Map<String, Long>> save(@RequestBody @Valid RecordDTO recordDTO){
         recordDTO.setRecordContent(StringEscapeUtils.escapeJson(recordDTO.getRecordContent()));
         Record savedRecord=recordService.save(recordDTO);
-        return new ResponseEntity<>(savedRecord.getId(), HttpStatus.CREATED);
+        return new ResponseEntity<>(Map.of("recordId", savedRecord.getId()
+        ), HttpStatus.CREATED);
     }
 
-    @PostMapping("/delete/{recordId}")
+    @PostMapping("/records/delete/{recordId}")
     public ResponseEntity<Record> delete(@PathVariable("recordId") Long recordId, @RequestBody @Valid RecordDeleteDTO recordDeleteDTO){
         Long recordWriterId = recordDeleteDTO.recordWriterId();
         recordService.deleteUpdate(recordId,recordWriterId);
@@ -108,9 +110,9 @@ public class RecordController {
     }
 
     @PatchMapping("/records/{recordId}")
-    public ResponseEntity<Long> update( @PathVariable("recordId") Long recordId, @RequestBody @Valid RecordUpdateDTO recordUpdatedDTO){
+    public ResponseEntity<Map<String, Long>> update( @PathVariable("recordId") Long recordId, @RequestBody @Valid RecordUpdateDTO recordUpdatedDTO){
         Record updatedRecord=recordService.update(recordId,recordUpdatedDTO);
-        return new ResponseEntity<>(updatedRecord.getId(), HttpStatus.CREATED);
+        return new ResponseEntity<>(Map.of("recordId", updatedRecord.getId()), HttpStatus.CREATED);
     }
 
     @GetMapping("/records/{recordId}")
@@ -129,8 +131,8 @@ public class RecordController {
     }
 
     @GetMapping("{projectId}/tagList")
-    public ResponseEntity<DashBoardDTO.TagListDTO> getTagList(@PathVariable("projectId") Long projectId){
-        DashBoardDTO.TagListDTO tagListDTO= recordService.getTagList(projectId);
+    public ResponseEntity<DashBoardDTO.TagCountListDTO> getTagList(@PathVariable("projectId") Long projectId){
+        DashBoardDTO.TagCountListDTO tagListDTO= recordService.getTagList(projectId);
         return new ResponseEntity<>(tagListDTO, HttpStatus.OK);
     }
     @Operation(

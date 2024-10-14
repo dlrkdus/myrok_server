@@ -31,4 +31,7 @@ public class MemberProject extends BaseTimeEntity{
     public void changeMemberProjectType(MemberProjectType memberProjectType){
         this.memberProjectType = memberProjectType;
     }
+    public String getProjectName() {
+        return project.getProjectName();
+    }
 }

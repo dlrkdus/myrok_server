@@ -5,15 +5,17 @@ import com.example.myrok.type.LoginProvider;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/myrok/auth")
 public class AuthController {
@@ -23,6 +25,7 @@ public class AuthController {
 
 
     //callback url 정보 담아오기
+    @ResponseBody
     @GetMapping("/google")
     public Map<String, String> getGoogleRedirectUrl(){
         Map<String, String> map = new HashMap<>();
@@ -31,9 +34,10 @@ public class AuthController {
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<String> getGoogleAccessToken(String code, String scope, HttpServletResponse response) throws IOException {
+    public String getGoogleAccessToken(String code, String scope, HttpServletResponse response) throws IOException {
         String accessToken = oAuth2Service.getAccessToken(code, LoginProvider.GOOGLE);
-        return ResponseEntity.ok().body(oAuth2Service.login(response, accessToken, LoginProvider.GOOGLE));
+        String loginUrl = oAuth2Service.login(accessToken, LoginProvider.GOOGLE);
+        return "redirect:" + loginUrl;
     }
 
 }

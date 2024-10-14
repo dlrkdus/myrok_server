@@ -3,6 +3,7 @@ package com.example.myrok.service;
 import com.example.myrok.domain.*;
 import com.example.myrok.domain.Record;
 import com.example.myrok.dto.project.DashBoardDTO;
+import com.example.myrok.dto.project.TagCountDTO;
 import com.example.myrok.dto.record.RecordResponseDTO;
 import com.example.myrok.dto.project.TagDTO;
 import com.example.myrok.dto.member.MemberDTO;
@@ -15,6 +16,7 @@ import com.example.myrok.dto.record.RecordUpdateDTO;
 import com.example.myrok.exception.CustomException;
 import com.example.myrok.repository.*;
 import com.example.myrok.type.ErrorCode;
+import com.example.myrok.type.MemberProjectType;
 import com.example.myrok.type.Role;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -82,7 +84,7 @@ public class RecordServiceImpl implements RecordService{
 
         // 멤버가 프로젝트 소속인지 확인
         for (Long memberId : members){
-            MemberProject memberProject = memberProjectRepository.findByMemberIdAndProjectId(memberId,projectId)
+            MemberProject memberProject = memberProjectRepository.findByMemberIdAndProjectIdAndMemberProjectType(memberId,projectId, PROJECT_MEMBER)
                     .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_IN_PROJECT, HttpStatus.BAD_REQUEST));
             // 탈퇴 여부도 확인.
             if (memberProject.getMemberProjectType()!=PROJECT_MEMBER){
@@ -193,6 +195,7 @@ public class RecordServiceImpl implements RecordService{
                 .tagList(tagList)
                 .memberList(memberList)
                 .tagList(tagList)
+                .projectId(record.getProject().getId())
                 .build();
 
         return readRecord;
@@ -273,17 +276,17 @@ public class RecordServiceImpl implements RecordService{
     }
 
     @Override
-    public DashBoardDTO.TagListDTO getTagList(Long projectId){
-        List<TagDTO> tags = recordTagRepository.findTagNameAndCountByProjectIdAndDeletedIsFalse(projectId)
+    public DashBoardDTO.TagCountListDTO getTagList(Long projectId){
+        List<TagCountDTO> tags = recordTagRepository.findTagNameAndCountByProjectIdAndDeletedIsFalseForRecord(projectId)
                 .orElse(Collections.emptyList());
 
         long totalCount = 0;
-        for(TagDTO tag : tags){
-            totalCount+=tag.getPercentage();
+        for(TagCountDTO tag : tags){
+            totalCount+=tag.getCount();
         }
-        DashBoardDTO.TagListDTO tagListDTO = DashBoardDTO.TagListDTO.builder()
+        DashBoardDTO.TagCountListDTO tagListDTO = DashBoardDTO.TagCountListDTO.builder()
                 .totalCount(totalCount)
-                .tags(tags)
+                .tagList(tags)
                 .build();
         return tagListDTO;
     }

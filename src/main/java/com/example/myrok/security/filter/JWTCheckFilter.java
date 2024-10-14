@@ -49,8 +49,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         String authHeaderStr = request.getHeader("Authorization");
 
-        //Bearer //7 JWT 문자열
-        try {
             //Bearer accestoken...
             String accessToken = authHeaderStr.substring(7);
             Map<String, Object> claims = JWTUtil.validateToken(accessToken);
@@ -75,16 +73,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             //dest
             //성공하면 다음 목적지로 보낸다
             filterChain.doFilter(request, response);
-        }catch(Exception e){
-            //만료와 같이 문제가 생길 경우 처리해준다
-            log.error("JWT Check Error..............");
-            log.error(e.getMessage());
-            Gson gson = new Gson();
-            String msg = gson.toJson(Map.of("error", "ERROR_ACCESS_TOKEN"));
-            response.setContentType("application/json");
-            PrintWriter printWriter = response.getWriter();
-            printWriter.println(msg);
-            printWriter.close();
-        }
+
     }
 }

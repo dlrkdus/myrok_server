@@ -1,9 +1,11 @@
 package com.example.myrok.controller;
 
 import com.example.myrok.exception.CustomJWTException;
+import com.example.myrok.type.ErrorCode;
 import com.example.myrok.util.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,11 +23,11 @@ public class APIRefreshController {
             String refreshToken
     ){
         if(refreshToken == null){
-            throw new CustomJWTException("NULL_REFRESH");
+            throw new CustomJWTException(ErrorCode.NULL_REFRESH);
         }
 
         if(authHeader == null || authHeader.length() < 7){
-            throw new CustomJWTException("INVALID STRING");
+            throw new CustomJWTException(ErrorCode.MALFORMED);
         }
 
         //Bearer //7
@@ -41,10 +43,10 @@ public class APIRefreshController {
         Map<String, Object> claims = JWTUtil.validateToken(refreshToken);
         log.info("refresh ... claims: " + claims);
         //다시 accessToken을 만들어준다
-        String newAccessToken = JWTUtil.generateToken(claims, 10);
+        String newAccessToken = JWTUtil.generateToken(claims, 24 * 60 * 36);
         //refresh token 유효 시간 별로 남지 않았을 경우
         String newRefreshToken = checkTime((Integer)claims.get("exp")) == true ?
-                JWTUtil.generateToken(claims, 60*24) : refreshToken;
+                JWTUtil.generateToken(claims, 24 * 60 * 36) : refreshToken;
         return Map.of("accessToken", newAccessToken, "refreshToken", newRefreshToken);
     }
 
@@ -64,7 +66,7 @@ public class APIRefreshController {
         try{
             JWTUtil.validateToken(token);
         }catch(CustomJWTException ex) {
-            if(ex.getMessage().equals("Expired")){
+            if(ex.getErrorCode() == ErrorCode.EXPIRED){
                 return true;
             }
         }

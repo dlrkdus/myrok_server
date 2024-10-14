@@ -43,7 +43,7 @@ public class OAuth2Service{
         return accessToken;
     }
 
-    public String login(HttpServletResponse response, String accessToken, LoginProvider provider) throws IOException {
+    public String login(String accessToken, LoginProvider provider) throws IOException {
         MemberDTO.MemberInformation memberInformation;
         if (provider == LoginProvider.GOOGLE) {
             memberInformation = oAuth2Util.getGoogleUserInfo(accessToken);
@@ -73,8 +73,8 @@ public class OAuth2Service{
 
         Map<String, Object> claims = memberSecurityDTO.getClaims();
 
-        String jwtToken = JWTUtil.generateToken(memberSecurityDTO.getClaims(), 10); //지금 당장 사용할 수 있는 권리
-        String jwtRefreshToken = JWTUtil.generateToken(memberSecurityDTO.getClaims(), 60 * 24); //교환권
+        String jwtToken = JWTUtil.generateToken(memberSecurityDTO.getClaims(), 30 * 60 * 24); //지금 당장 사용할 수 있는 권리
+        String jwtRefreshToken = JWTUtil.generateToken(memberSecurityDTO.getClaims(), 30 * 60 * 24); //교환권
 
         claims.put("accessToken", jwtToken);
         claims.put("refreshToken", jwtRefreshToken);
