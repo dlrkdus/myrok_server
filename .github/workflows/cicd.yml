@@ -55,5 +55,5 @@ jobs:
           scp -i ~/.ssh/id_rsa build/libs/myrok-0.0.1-SNAPSHOT.jar ubuntu@43.201.149.117:/home/ubuntu/app_build/
       - name: Deploy to EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@43.201.149.117 'bash -s' < deploy_script.sh
+          ssh -i ~/.ssh/id_rsa ubuntu@43.201.149.117 'bash /home/ubuntu/deploy_script.sh'
 
