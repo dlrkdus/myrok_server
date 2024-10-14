@@ -6,6 +6,12 @@ on:
   push:
     branches: [ dev ]
 
+env:
+  PROJECT_NAME: myrok
+  BUCKET_NAME: myrok-cicd-bucket
+  CODE_DEPLOY_APP_NAME: myrokapp
+  DEPLOYMENT_GROUP_NAME: myrokapp_deploygroup
+
 jobs:
   build:
     runs-on: ubuntu-latest # 3 실행 환경 지정
@@ -22,31 +28,25 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+        shell: bash
 
       - name: Build with Gradle
         run: ./gradlew clean build
+        shell: bash
 
-      # SSH 설정
-      - name: Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.MYROK_EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          # 프라이빗 키의 첫 줄 확인
-          head -n 1 ~/.ssh/id_rsa
+      - name: Make Zip File
+        run: zip -qq -r ./$GITHUB_SHA.zip
+        shell: bash
 
-      - name: Add EC2 Public IP
-        run: |
-          ssh-keyscan -H 43.201.149.117 >> ~/.ssh/known_hosts
-      # SSH 연결 테스트
-      - name: Test SSH connection
-        run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@43.201.149.117 "echo 'SSH connection successful'"
-      # JAR 파일을 EC2로 복사
-      - name: Copy JAR file to EC2
-        run: |
-          scp -l 1000 -i ~/.ssh/id_rsa build/libs/myrok-0.0.1-SNAPSHOT.jar ubuntu@43.201.149.117:/home/ubuntu/app_build/
-      - name: Deploy to EC2
-        run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@43.201.149.117 'bash /home/ubuntu/deploy_script.sh'
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key-id: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ap-northeast-2
 
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
+
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name $CODE_DEPLOY_APP_NAME --deployment-config-name CodeDeployDefault.OneAtATime --deployment-group-name $DEPLOYMENT_GROUP_NAME --s3-location bucket=$BUCKET_NAME, bundleType=zip,key=$PROJECT_NAME/$GITHUB.SHA.zip
