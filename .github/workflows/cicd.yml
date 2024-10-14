@@ -45,6 +45,10 @@ jobs:
       - name: Add EC2 Public IP
         run: |
           ssh-keyscan -H 43.201.149.117 >> ~/.ssh/known_hosts
+      # SSH 연결 테스트
+      - name: Test SSH connection
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@43.201.149.117 "echo 'SSH connection successful'"
       # JAR 파일을 EC2로 복사
       - name: Copy JAR file to EC2
         run: |
