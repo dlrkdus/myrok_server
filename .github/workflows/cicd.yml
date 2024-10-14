@@ -39,6 +39,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{secrets.MYROK_EC2_SSH_KEY}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          # 프라이빗 키의 첫 줄 확인
+          head -n 1 ~/.ssh/id_rsa
 
       - name: Add EC2 Public IP
         run: |
