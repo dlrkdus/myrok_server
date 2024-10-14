@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REPOSITORY=/opt/testapp
+REPOSITORY=/home/ubuntu/app
 cd $REPOSITORY
 
 APP_NAME=myrok
